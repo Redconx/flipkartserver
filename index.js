@@ -2,7 +2,7 @@ import express, { request, response } from "express";
 import dotenv from "dotenv";
 import Connection from "./database/db.js";
 import DefaultData from "./default.js";
-import cors from "cors";
+// import cors from "cors";
 import bodyParser from "body-parser";
 import { v4 as uuid } from "uuid";
 import paytmchecksum from './paytm/PaytmChecksum.js'
@@ -69,7 +69,7 @@ paytmParams['MOBILE_NO']='1234567890';
 const USERNAME = process.env.DB_USERNAME;
 const PASSWORD = process.env.DB_PASSWORD;
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json()); //because we were getting undefined body
 
 
