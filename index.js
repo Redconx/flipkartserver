@@ -16,12 +16,14 @@ import Mobile from "./schema/mobile-schema.js";
 import Pincode from "./schema/pincode-schema.js";
 
 
-app.use(cors({
-  origin: '*'
-}));
+
 
 const app = express();
 dotenv.config();
+
+app.use(cors({
+  origin: '*'
+}));
 
 // const PORT = 2410;
 var PORT = process.env.PORT||2410;
