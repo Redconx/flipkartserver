@@ -21,9 +21,6 @@ import Pincode from "./schema/pincode-schema.js";
 const app = express();
 dotenv.config();
 
-app.use(cors({
-  origin: '*'
-}));
 
 // const PORT = 2410;
 var PORT = process.env.PORT||2410;
@@ -49,6 +46,9 @@ const PASSWORD = process.env.DB_PASSWORD;
 
 app.use(cors());
 app.use(express.json()); //because we were getting undefined body
+app.use(cors({
+  origin: '*'
+}));
 
 // because we were getting undefined body
 // app.use(bodyParser.json({extended:true}))
