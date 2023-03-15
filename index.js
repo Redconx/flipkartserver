@@ -21,6 +21,18 @@ import Pincode from "./schema/pincode-schema.js";
 const app = express();
 dotenv.config();
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+    res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE, HEAD"
+  );
+  next();
+});
 
 // const PORT = 2410;
 var PORT = process.env.PORT||2410;
@@ -34,7 +46,7 @@ paytmParams['INDUSTRY_TYPE_ID']=process.env.PAYTM_INDUSTRY_TYPE_ID;
 paytmParams['ORDER_ID']=uuid();
 paytmParams['TOKEN']=process.env.PAYTM_CUST_ID;
 paytmParams['TXN_AMOUNT']='100';
-// paytmParams['CALLBACK_URL']='http://localhost:2410/callback'
+paytmParams['CALLBACK_URL']='http://localhost:2410/callback'
 paytmParams['EMAIL']='ajaynaugain907@gmail.com'
 paytmParams['MOBILE_NO']='1234567890';
 
@@ -46,9 +58,7 @@ const PASSWORD = process.env.DB_PASSWORD;
 
 app.use(cors());
 app.use(express.json()); //because we were getting undefined body
-app.use(cors({
-  origin: '*'
-}));
+
 
 // because we were getting undefined body
 // app.use(bodyParser.json({extended:true}))
@@ -209,7 +219,8 @@ app.post("/callback",function(req,res){
         });
         post_res.on("end", function () {
           let result = JSON.parse(res);
-          response.redirect("http://localhost:3000");
+          
+          Response.redirect("http://localhost:3000");
         });
       });
 
