@@ -8,7 +8,6 @@ import { v4 as uuid } from "uuid";
 import paytmchecksum from './paytm/PaytmChecksum.js'
 import formidable from "formidable";
 import https from 'https'
-response.setHeader("Access-Control-Allow-Origin", "*")
 
 //schemas
 import User from "./schema/user-schema.js"
@@ -17,6 +16,9 @@ import Mobile from "./schema/mobile-schema.js";
 import Pincode from "./schema/pincode-schema.js";
 
 
+app.use(cors({
+  origin: '*'
+}));
 
 const app = express();
 dotenv.config();
