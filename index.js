@@ -2,7 +2,7 @@ import express, { request, response } from "express";
 import dotenv from "dotenv";
 import Connection from "./database/db.js";
 import DefaultData from "./default.js";
-// import cors from "cors";
+import cors from "cors";
 import bodyParser from "body-parser";
 import { v4 as uuid } from "uuid";
 import paytmchecksum from './paytm/PaytmChecksum.js'
@@ -25,29 +25,39 @@ dotenv.config();
 //   res.header("Access-Control-Allow-Origin", "*");
 //   res.header(
 //     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept"
+//     "*"
 //   );
+//   res.header('Access-Control-Request-Headers', '*');
 //     res.header(
 //     "Access-Control-Allow-Methods",
 //     "GET, POST, OPTIONS, PUT, PATCH, DELETE, HEAD"
 //   );
 //   next();
 // });
-app.use(function(req, res, next) {
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-With,content-type"
-  );
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  next();
-});
+// app.use(function(req, res, next) {
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     "X-Requested-With,content-type"
+//   );
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+//   );
+//   res.setHeader("Access-Control-Allow-Credentials", true);
+//   next();
+// });
 
 // const PORT = 2410;
+
+const corsOpts = {
+  origin: '*',
+  credentials: true,
+  methods: ['GET','POST','HEAD','PUT','PATCH','DELETE'],
+  allowedHeaders: ['Content-Type'],
+  exposedHeaders: ['Content-Type']
+};
+app.use(cors(corsOpts));
 var PORT = process.env.PORT||2410;
 
 let paytmMerchantKey=process.env.PAYTM_MERCHANT_KEY;
