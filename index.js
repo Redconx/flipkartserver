@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import Connection from "./database/db.js";
 import DefaultData from "./default.js";
 import cors from "cors";
-import bodyParser from "body-parser";
+// import bodyParser from "body-parser";
 import { v4 as uuid } from "uuid";
 import paytmchecksum from './paytm/PaytmChecksum.js'
 import formidable from "formidable";
@@ -50,6 +50,7 @@ dotenv.config();
 
 // const PORT = 2410;
 
+app.use(express.json()); //because we were getting undefined body
 const corsOpts = {
   origin: '*',
   credentials: true,
@@ -80,7 +81,6 @@ const USERNAME = process.env.DB_USERNAME;
 const PASSWORD = process.env.DB_PASSWORD;
 
 // app.use(cors());
-app.use(express.json()); //because we were getting undefined body
 
 
 // because we were getting undefined body
