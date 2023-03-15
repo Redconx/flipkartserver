@@ -8,6 +8,7 @@ import { v4 as uuid } from "uuid";
 import paytmchecksum from './paytm/PaytmChecksum.js'
 import formidable from "formidable";
 import https from 'https'
+response.setHeader("Access-Control-Allow-Origin", "*")
 
 //schemas
 import User from "./schema/user-schema.js"
