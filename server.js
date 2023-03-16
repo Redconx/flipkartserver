@@ -21,34 +21,7 @@ import Pincode from "./schema/pincode-schema.js";
 const app = express();
 dotenv.config();
 
-// app.use(function (req, res, next) {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "*"
-//   );
-//   res.header('Access-Control-Request-Headers', '*');
-//     res.header(
-//     "Access-Control-Allow-Methods",
-//     "GET, POST, OPTIONS, PUT, PATCH, DELETE, HEAD"
-//   );
-//   next();
-// });
-// app.use(function(req, res, next) {
-//   res.setHeader(
-//     "Access-Control-Allow-Headers",
-//     "X-Requested-With,content-type"
-//   );
-//   res.setHeader("Access-Control-Allow-Origin", "*");
-//   res.setHeader(
-//     "Access-Control-Allow-Methods",
-//     "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-//   );
-//   res.setHeader("Access-Control-Allow-Credentials", true);
-//   next();
-// });
 
-// const PORT = 2410;
 
 app.use(express.json()); //because we were getting undefined body
 const corsOpts = {
@@ -59,6 +32,12 @@ const corsOpts = {
   exposedHeaders: ['Content-Type']
 };
 app.use(cors(corsOpts));
+
+const USERNAME = process.env.DB_USERNAME;
+const PASSWORD = process.env.DB_PASSWORD;
+
+const URL = process.env.MONGODB_URI || `mongodb+srv://${USERNAME}:${PASSWORD}@ecommerce.lipcdaz.mongodb.net/?retryWrites=true&w=majority`;
+
 var PORT = process.env.PORT||2410;
 
 let paytmMerchantKey=process.env.PAYTM_MERCHANT_KEY;
@@ -77,8 +56,6 @@ paytmParams['MOBILE_NO']='1234567890';
 
 
 
-const USERNAME = process.env.DB_USERNAME;
-const PASSWORD = process.env.DB_PASSWORD;
 
 // app.use(cors());
 
@@ -231,19 +208,18 @@ app.post("/callback",function(req,res){
         port: 443,
         path: "/order/status",
         headers: {
-          "Content-Type": "application/json",
-          "Content-Length": post_data.length,
+          'Content-Type': 'application/json',
+          'Content-Length': post_data.length,
         },
       };
       let res=""
       let post_req = https.request(options, function (post_res) {
-        post_res.on("data", function (chunk) {
+        post_res.on('data', function (chunk) {
           res += chunk;
         });
         post_res.on("end", function () {
           let result = JSON.parse(res);
-          
-          Response.redirect("http://localhost:3000");
+          response.redirect("http://localhost:3000/");
         });
       });
 
@@ -260,7 +236,7 @@ app.post("/callback",function(req,res){
 })
 
 
-Connection(USERNAME, PASSWORD);
+Connection(URL);
 
 DefaultData();
 
