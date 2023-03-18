@@ -14,6 +14,7 @@ import User from "./schema/user-schema.js"
 import Product from "./schema/product-schema.js";
 import Mobile from "./schema/mobile-schema.js";
 import Pincode from "./schema/pincode-schema.js";
+import Review from "./schema/review-schema.js";
 
 
 
@@ -24,14 +25,14 @@ dotenv.config();
 
 
 app.use(express.json()); //because we were getting undefined body
-const corsOpts = {
-  origin: '*',
-  credentials: true,
-  methods: ['GET','POST','HEAD','PUT','PATCH','DELETE'],
-  allowedHeaders: ['Content-Type'],
-  exposedHeaders: ['Content-Type']
-};
-app.use(cors(corsOpts));
+// const corsOpts = {
+//   origin: '*',
+//   credentials: true,
+//   methods: ['GET','POST','HEAD','PUT','PATCH','DELETE'],
+//   allowedHeaders: ['Content-Type'],
+//   exposedHeaders: ['Content-Type']
+// };
+app.use(cors());
 
 const USERNAME = process.env.DB_USERNAME;
 const PASSWORD = process.env.DB_PASSWORD;
@@ -42,16 +43,33 @@ var PORT = process.env.PORT||2410;
 
 let paytmMerchantKey=process.env.PAYTM_MERCHANT_KEY;
 let paytmParams={}
-paytmParams['MID']=process.env.PAYTM_MID;
-paytmParams['WEBSITE']=process.env.PAYTM_WEBSITE;
-paytmParams['CHANNEL_ID']=process.env.PAYTM_CHANNEL_ID;
-paytmParams['INDUSTRY_TYPE_ID']=process.env.PAYTM_INDUSTRY_TYPE_ID;
-paytmParams['ORDER_ID']=uuid();
-paytmParams['TOKEN']=process.env.PAYTM_CUST_ID;
-paytmParams['TXN_AMOUNT']='100';
-paytmParams['CALLBACK_URL']='http://localhost:2410/callback'
-paytmParams['EMAIL']='ajaynaugain907@gmail.com'
-paytmParams['MOBILE_NO']='1234567890';
+// paytmParams['MID']=process.env.PAYTM_MID;
+// paytmParams['WEBSITE']=process.env.PAYTM_WEBSITE;
+// paytmParams['CHANNEL_ID']=process.env.PAYTM_CHANNEL_ID;
+// paytmParams['INDUSTRY_TYPE_ID']=process.env.PAYTM_INDUSTRY_TYPE_ID;
+// paytmParams['ORDER_ID']=uuid();
+// paytmParams['TOKEN']=process.env.PAYTM_CUST_ID;
+// paytmParams['TXN_AMOUNT']='100';
+// paytmParams['CALLBACK_URL']='http://localhost:2410/callback'
+// paytmParams['EMAIL']='ajaynaugain907@gmail.com'
+// paytmParams['MOBILE_NO']='1234567890';
+
+
+paytmParams.body = {
+  "requestType"   : "Payment",
+  "mid"           : process.env.PAYTM_MID,
+  "websiteName"   : process.env.PAYTM_WEBSITE,
+  "orderId"       : uuid(),
+  "callbackUrl"   : "http://localhost:2410/callback",
+  "txnAmount"     : {
+      "value"     : "1.00",
+      "currency"  : "INR",
+  },
+  "userInfo"      : {
+      "custId"    : "CUST_001",
+  },
+};
+
 
 
 
@@ -64,6 +82,19 @@ paytmParams['MOBILE_NO']='1234567890';
 // app.use(bodyParser.json({extended:true}))
 // app.use(bodyParser.urlencoded({extended:true}))
 
+const paginate = (items, page , perPage ) => {
+  const offset = perPage * (page - 1);
+  const totalPages = Math.ceil(items.length / perPage);
+  const paginatedItems = items.slice(offset, perPage * page);
+
+  return {
+      previousPage: page - 1 ? page - 1 : null,
+      nextPage: (totalPages > page) ? page + 1 : null,
+      total: items.length,
+      totalPages: totalPages,
+      items: paginatedItems
+  };
+};
 app.post("/signup", async function (req, res) {
   console.log("singup", req.body);
   const exist = await User.findOne({ username: req.body.username });
@@ -100,15 +131,16 @@ app.get("/getProducts", async function (req, res) {
     res.status(500).send(error);
   }
 });
+
 app.get("/getPincodes", async function (req, res) {
   try {
     const pincodes = await Pincode.find({})
-    console.log({pincodes})
     res.send(pincodes);
   } catch (error) {
     res.status(500).send(error);
   }
 });
+
 app.get("/getMobiles", async function (req, res) {
   const {brand,ram,rating,price}=req.query
   
@@ -165,6 +197,7 @@ app.get("/product/:id", async function (req, res) {
     res.send(500).send(error.message);
   }
 });
+
 app.get("/mobile/:id", async function (req, res) {
   try {
     let { id } = req.params;
@@ -175,12 +208,35 @@ app.get("/mobile/:id", async function (req, res) {
   }
 });
 
+
+app.get('/reviews/:id', async (req, res) => {
+  // destructure page and limit and set default values
+  let id=req.params.id
+  const { reviewPage = 1, limit = 5 } = req.query;
+  console.log(id)
+  try {
+    // execute query with page and limit values
+    let resRev = await Review.find({mobileId:id})
+    let {ratings}=resRev[0]
+    console.log(reviewPage)
+    const reviewArr=paginate(ratings,+reviewPage,+limit)
+    res.send(reviewArr);
+  } catch (err) {
+    console.error('err',err.message);
+  }
+});
+
+
 app.post("/payment",async function(req,res){
-try {
-  let paytmChecksum=await paytmchecksum.generateSignature(paytmParams,paytmMerchantKey)
-  console.log(paytmChecksum,'in /pay api')
-   let params={...paytmParams, 'CHECKSUMHASH' : paytmChecksum }
-   res.send(params)
+  try {
+    let paytmChecksum=await paytmchecksum.generateSignature(JSON.stringify(paytmParams.body) ,paytmMerchantKey)
+    // console.log(paytmChecksum,'in /pay api')
+    console.log(paytmChecksum)
+    paytmParams.head = {
+      "signature"    : paytmChecksum
+  };
+  //  let params={...paytmParams, 'CHECKSUMHASH' : paytmChecksum }
+   res.send(paytmParams)
 } catch (error) {
   res.status(500).send(error.message)
 }
@@ -236,13 +292,13 @@ app.post("/callback",function(req,res){
 })
 
 
-Connection(URL);
+  Connection(URL);
 
-DefaultData();
+  DefaultData();
 
-app.listen(PORT, () =>
-  console.log(`server is running succesfully on port ${PORT}`)
-);
+  app.listen(PORT, () =>
+    console.log(`server is running succesfully on port ${PORT}`)
+  );
 
 
 
